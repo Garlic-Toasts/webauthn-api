@@ -1,45 +1,45 @@
-version: '3'
+  version: '3'
 
-services:
-  backend:
-    build:
-      context: ./
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-      REDIS_URL: ${REDIS_URL}
-      RP_NAME: ${RP_NAME}
-      RP_ID: ${RP_ID}
-    expose:
-      - 3000
-    ports:
-      - "3000:3000"
+  services:
+    backend:
+      build:
+        context: ./
+      environment:
+        DATABASE_URL: ${DATABASE_URL}
+        REDIS_URL: ${REDIS_URL}
+        RP_NAME: ${RP_NAME}
+        RP_ID: ${RP_ID}
+      expose:
+        - 3000
+      ports:
+        - "3000:3000"
 
-    depends_on:
-      - postgres
-      - redis
-    restart: always
+      depends_on:
+        - postgres
+        - redis
+      restart: always
 
-  postgres:
-    image: postgres:alpine
-    environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_DB}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    restart: always
-    expose:
-      - 5432
+    postgres:
+      image: postgres:alpine
+      environment:
+        POSTGRES_USER: ${DATABASE_USER}
+        POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+        POSTGRES_DB: ${DATABASE_DB}
+      volumes:
+        - pgdata:/var/lib/postgresql/data
+      restart: always
+      expose:
+        - 5432
 
-  redis:
-    image: redis:6.2-alpine
-    restart: always
-    ports:
-      - '6379:6379'
-    volumes:
-      - redis:/data
+    redis:
+      image: redis:6.2-alpine
+      restart: always
+      volumes:
+        - redis:/data
+      expose:
+        - 6379
 
-volumes:
-  pgdata:
-  redis:
+  volumes:
+    pgdata:
+    redis:
 
