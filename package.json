@@ -4,6 +4,7 @@
   "author": "Garlic Toasts",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "scripts": {
     "build": "nest build",
     "start": "nest start",

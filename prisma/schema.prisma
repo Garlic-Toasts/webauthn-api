@@ -17,7 +17,7 @@ model User {
 
 model Passkey {
     id             String   @id
-    public_key     String
+    public_key     Bytes
     user           User     @relation(references: [id], fields: [userId])
     userId         Int
     webauthnUserId String

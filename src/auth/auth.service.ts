@@ -74,18 +74,20 @@ export class AuthService {
                 expectedChallenge: options.challenge,
                 expectedOrigin: `https://${rpId}`,
                 expectedRPID: rpId,
-                // @ts-ignore
                 authenticator: {
                     ...passkey,
                     credentialID: passkey.id,
-                    // @ts-ignore
-                    credentialPublicKey: Unit8Array.from(passkey.public_key),
+                    credentialPublicKey: new Uint8Array(passkey.public_key),
+                    transports: passkey.transports as any[],
                 },
             });
         } catch (error) {
             console.error(error);
             throw new BadRequestException(`Не удалось авторизоваться в аккаунт.`);
         }
+
+        if (verification.verified)
+            await this.updatePasskeyCounter(passkey.id, verification.authenticationInfo.newCounter);
 
         return {
             success: verification.verified,
@@ -163,11 +165,22 @@ export class AuthService {
                 },
                 webauthnUserId: options.user.id,
                 id: credentialID,
-                public_key: JSON.stringify(credentialPublicKey),
+                public_key: Buffer.from(credentialPublicKey),
                 counter: counter,
                 backup_status: credentialBackedUp,
                 deviceType: credentialDeviceType,
                 transports: transports,
+            },
+        });
+    }
+
+    private async updatePasskeyCounter(passkeyId: string, counter: number): Promise<void> {
+        await this.prisma.passkey.update({
+            where: {
+                id: passkeyId,
+            },
+            data: {
+                counter: counter,
             },
         });
     }
