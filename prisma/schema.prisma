@@ -1,0 +1,29 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id        Int       @id @default(autoincrement())
+    login     String    @unique
+    createdAt DateTime  @default(now())
+    passkeys  Passkey[]
+}
+
+model Passkey {
+    id             String   @id
+    public_key     String
+    user           User     @relation(references: [id], fields: [userId])
+    userId         Int
+    webauthnUserId String
+    counter        Int      @default(0)
+    deviceType     String
+    backup_status  Boolean
+    transports     String[]
+    createdAt      DateTime @default(now())
+}
