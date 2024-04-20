@@ -106,10 +106,9 @@ export class AuthService {
                 id: passkey.id,
             })),
             authenticatorSelection: {
-                residentKey: "preferred",
-                userVerification: "required",
-                authenticatorAttachment: "platform",
-            },
+                authenticatorAttachment: "cross-platform",
+                userVerification: "preferred"
+            }
         });
         await this.redis.set(`webauthnoptions:${user.id}`, JSON.stringify(options));
         return options;
