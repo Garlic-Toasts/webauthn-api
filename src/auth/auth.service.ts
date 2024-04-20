@@ -67,6 +67,10 @@ export class AuthService {
         const options = await this.getUserOptions(user.login);
         const rpId = await this.configService.get("RP_ID");
         const passkey = await this.getPasskeyById(loginData.id);
+        if (!passkey) {
+            throw new BadRequestException(`Необходимо еще раз вызвать челлендж регистрации.`);
+        }
+
         let verification: VerifiedAuthenticationResponse;
         try {
             verification = await verifyAuthenticationResponse({
@@ -106,9 +110,9 @@ export class AuthService {
                 id: passkey.id,
             })),
             authenticatorSelection: {
-                authenticatorAttachment: "cross-platform",
-                userVerification: "preferred"
-            }
+                authenticatorAttachment: "platform",
+                userVerification: "preferred",
+            },
         });
         await this.redis.set(`webauthnoptions:${user.id}`, JSON.stringify(options));
         return options;
