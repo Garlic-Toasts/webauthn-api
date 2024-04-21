@@ -9,8 +9,7 @@ export class UserMiddleware implements NestMiddleware {
         try {
             const sessionId = req.headers.authorization.split(" ")[1];
             (req as any).user = await this.authService.getUserBySessionId(sessionId);
-        } catch (e) {
-            next(e);
-        }
+        } catch (e) {}
+        next();
     }
 }
