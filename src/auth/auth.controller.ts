@@ -5,6 +5,8 @@ import {
     PublicKeyCredentialRequestOptionsJSON,
     RegistrationResponseJSON,
 } from "@simplewebauthn/types";
+import { RegistrationModel } from "./models/registration.model";
+import { AuthModel } from "./models/auth.model";
 
 @Controller("auth")
 export class AuthController {
@@ -25,7 +27,7 @@ export class AuthController {
     async verifyRegistration(
         @Param("login") login: string,
         @Body() body: RegistrationResponseJSON
-    ): Promise<any> {
+    ): Promise<RegistrationModel> {
         return this.authService.verifyRegistrationResponse(login, body);
     }
 
@@ -40,7 +42,7 @@ export class AuthController {
     async verifyLogin(
         @Param("login") login: string,
         @Body() body: AuthenticationResponseJSON
-    ): Promise<PublicKeyCredentialRequestOptionsJSON> {
+    ): Promise<AuthModel> {
         return this.authService.verifyLoginResponse(login, body);
     }
 }

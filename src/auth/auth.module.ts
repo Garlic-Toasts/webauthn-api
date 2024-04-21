@@ -9,5 +9,6 @@ import { RedisModule } from "../redis/redis.module";
     imports: [PrismaModule, ConfigModule, RedisModule],
     providers: [AuthService],
     controllers: [AuthController],
+    exports: [AuthService],
 })
 export class AuthModule {}

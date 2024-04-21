@@ -17,6 +17,8 @@ import {
     RegistrationResponseJSON,
 } from "@simplewebauthn/types";
 import { RedisClientType } from "redis";
+import { RegistrationModel } from "./models/registration.model";
+import { AuthModel } from "./models/auth.model";
 
 @Injectable()
 export class AuthService {
@@ -34,6 +36,19 @@ export class AuthService {
             throw new BadRequestException(`Пользователя с логином ${login} не существует.`);
         }
     }
+
+    public async getUserBySessionId(sessionId: string): Promise<User> {
+        return this.prisma.user.findFirst({
+            where: {
+                passkeys: {
+                    some: {
+                        id: sessionId,
+                    },
+                },
+            },
+        });
+    }
+
     public async createUser(login: string): Promise<User> {
         try {
             return await this.prisma.user.create({
@@ -62,7 +77,7 @@ export class AuthService {
     public async verifyLoginResponse(
         login: string,
         loginData: AuthenticationResponseJSON
-    ): Promise<any> {
+    ): Promise<AuthModel> {
         const user = await this.getUserByLogin(login);
         const options = await this.getUserOptions(user.login);
         const rpId = await this.configService.get("RP_ID");
@@ -95,6 +110,9 @@ export class AuthService {
 
         return {
             success: verification.verified,
+            authInfo: verification.authenticationInfo,
+            user: user,
+            passkeyId: passkey.id,
         };
     }
 
@@ -121,7 +139,7 @@ export class AuthService {
     public async verifyRegistrationResponse(
         login: string,
         registerData: RegistrationResponseJSON
-    ): Promise<any> {
+    ): Promise<RegistrationModel> {
         const user = await this.getUserByLogin(login);
         const options = await this.getUserOptions(user.login);
         const rpId = await this.configService.get("RP_ID");
@@ -138,9 +156,16 @@ export class AuthService {
             console.error(error);
             throw new BadRequestException(`Не удалось верифицировать регистрацию.`);
         }
-        await this.createPasskey(login, verification, registerData.response.transports);
+        const passkey = await this.createPasskey(
+            login,
+            verification,
+            registerData.response.transports
+        );
         return {
             success: verification.verified,
+            authInfo: verification.registrationInfo,
+            user: user,
+            passkeyId: passkey.id,
         };
     }
 
@@ -148,7 +173,7 @@ export class AuthService {
         login: string,
         verification: VerifiedRegistrationResponse,
         transports: string[]
-    ): Promise<void> {
+    ): Promise<Passkey> {
         const user = await this.getUserByLogin(login);
         const options = await this.getUserOptions(login);
         const { registrationInfo } = verification;
@@ -159,7 +184,7 @@ export class AuthService {
             credentialDeviceType,
             credentialBackedUp,
         } = registrationInfo;
-        await this.prisma.passkey.create({
+        return this.prisma.passkey.create({
             data: {
                 user: {
                     connect: {
