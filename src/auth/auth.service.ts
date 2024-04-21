@@ -112,7 +112,7 @@ export class AuthService {
             success: verification.verified,
             authInfo: verification.authenticationInfo,
             user: user,
-            passkeyId: passkey.id,
+            passkey: passkey,
         };
     }
 
@@ -166,7 +166,7 @@ export class AuthService {
             success: verification.verified,
             authInfo: verification.registrationInfo,
             user: user,
-            passkeyId: passkey.id,
+            passkey: passkey,
         };
     }
 
